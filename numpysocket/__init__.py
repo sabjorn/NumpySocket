@@ -1,1 +1,1 @@
-from numpysocket.numpysocket import NumpySocket
+from numpysocket import NumpySocket
