@@ -1,6 +1,5 @@
 from numpysocket import NumpySocket
 import cv2
-from scipy.misc import imresize
 
 host_ip = 'localhost'  # change me
 cap = cv2.VideoCapture(0)
@@ -11,7 +10,7 @@ npSocket.startServer(host_ip, 9999)
 while(cap.isOpened()):
     ret, frame = cap.read()
     ref_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    frame_resize = imresize(ref_frame, .5)
+    frame_resize = ref_frame[::2, ::2]
     if ret is True:
         npSocket.sendNumpy(frame_resize)
     else:

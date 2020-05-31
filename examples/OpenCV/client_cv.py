@@ -17,4 +17,4 @@ while(True):
         break
 
 npSocket.endServer()
-print "Closing"
+print("Closing")
