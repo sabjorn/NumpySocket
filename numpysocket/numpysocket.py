@@ -34,6 +34,7 @@ class NumpySocket():
             self.socket.connect((self.address, self.port))
             logging.info("Connected to {0} on port {1}".format(self.address, self.port))
         except socket.error as err:
+            self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             logging.error("Connection to {0} on port {1} failed".format(self.address, self.port))
             raise
 

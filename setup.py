@@ -1,7 +1,7 @@
 import setuptools
 
 setuptools.setup(name='numpysocket',
-                 version='0.2.0',
+                 version='0.2.1',
                  description='TCP/IP Socket for Sending Numpy Arrays',
                  long_description=open('README.md').read().strip(),
                  author="Steven A. Bjornson",
