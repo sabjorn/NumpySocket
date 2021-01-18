@@ -84,14 +84,14 @@ class NumpySocket():
         self.client_connection.shutdown(1)
         self.client_connection.close()
 
-    def recieveNumpy(self):
+    def recieveNumpy(self, socket_buffer_size=1024):
         if self.type is not "client":
             raise ConfigurationError("class not configured as client")
 
         length = None
         frameBuffer = bytearray()
         while True:
-            data = self.client_connection.recv(1024)
+            data = self.client_connection.recv(socket_buffer_size)
             frameBuffer += data
             if len(frameBuffer) == length:
                 break
