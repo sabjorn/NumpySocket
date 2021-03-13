@@ -1,21 +1,35 @@
 #!/usr/bin/python3
 
 import logging
+from time import sleep
 import numpy as np
 from numpysocket import NumpySocket
 
 logger = logging.getLogger('simple client')
 logger.setLevel(logging.INFO)
 
-logger.info("waiting for frame")
+host_ip = 'localhost'  # change me
+
 npSocket = NumpySocket()
+while(True):
+    try:
+        npSocket.startClient(host_ip, 9999)
+        break
+    except:
+        logger.warning("connection failed, make sure `server` is running.")
+        sleep(1)
+        continue
 
-npSocket.startClient(9999)
-frame = npSocket.recieveNumpy()
-logger.info("frame recieved")
+logger.info("connected to server")
+
+frame = np.arange(1000)
+
+logger.info("sending numpy array:")
 logger.info(frame)
+npSocket.send(frame)
 
+logger.info("array sent, closing connection")
 try:
-    npSocket.endServer()
+    npSocket.close()
 except OSError as err:
-    logging.error("server already disconnected")
+    logging.error("client already disconnected")

@@ -5,50 +5,57 @@ import logging
 import numpy as np
 from io import BytesIO
 
-class ConfigurationError(Exception):
-    """Server/Client Configuration Issue"""
-    def __init__(self, *args):
-        if args:
-            self.message = args[0]
-        else:
-            self.message = None
-
-    def __str__(self):
-        if self.message:
-            return "ConfigurationError, {0}".format(self.message)
-        else:
-            return "ConfigurationError raised"
 
 class NumpySocket():
     def __init__(self):
         self.address = 0
         self.port = 0
+        self.client_connection = self.client_address = None
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.type = None  # server or client
+        self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
-    def startServer(self, address, port):
-        self.type = "server"
+    def __del__(self):
+        try:
+            self.client_connection.shutdown(socket.SHUT_WR)
+            self.socket.shutdown(socket.SHUT_WR)
+        except (AttributeError, OSError):
+            pass
+        except Exception as e:
+            logging.error("error when deleting socket", e)
+
+        self.close()
+
+    def startServer(self, port):
+        self.address = ''
+        self.port = port
+
+        self.socket.bind((self.address, self.port))
+        self.socket.listen(1)
+        
+        logging.debug("waiting for a connection")
+        self.client_connection, self.client_address = self.socket.accept()
+        logging.debug(f"connected to: {self.client_address[0]}")
+
+    def startClient(self, address, port):
         self.address = address
         self.port = port
         try:
             self.socket.connect((self.address, self.port))
-            logging.info("Connected to {0} on port {1}".format(self.address, self.port))
+            logging.debug(f"Connected to {self.address} on port {self.port}")
         except socket.error as err:
-            self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            logging.error("Connection to {0} on port {1} failed".format(self.address, self.port))
+            logging.error(f"Connection to {self.address} on port {self.port} failed")
             raise
 
-    def endServer(self):
-        self.socket.shutdown(1)
+    def close(self):
+        try:
+            self.client_connection.close()
+        except AttributeError:
+            pass
+        self.client_connection = self.client_address = None
         self.socket.close()
 
-    def sendNumpy(self, frame):
-        if self.type is not "server":
-            raise ConfigurationError("class not configured as server")
-
-        if not isinstance(frame, np.ndarray):
-            raise TypeError("input frame is not a valid numpy array")
-        
+    @staticmethod
+    def __pack_frame(frame):
         f = BytesIO()
         np.savez(f, frame=frame)
         
@@ -61,37 +68,36 @@ class NumpySocket():
 
         f.seek(0)
         out += f.read()
+        return out
+
+    def send(self, frame):
+        if not isinstance(frame, np.ndarray):
+            raise TypeError("input frame is not a valid numpy array")
+
+        out = self.__pack_frame(frame)
+
+        socket = self.socket
+        if(self.client_connection):
+            socket = self.client_connection
 
         try:
-            self.socket.sendall(out)
-        except Exception:
-            exit()
+            socket.sendall(out)
+        except BrokenPipeError:
+            logging.error("connection broken")
+            raise
 
         logging.debug("frame sent")
 
-    def startClient(self, port):
-        self.type = "client"
-        self.address = ''
-        self.port = port
 
-        self.socket.bind((self.address, self.port))
-        self.socket.listen(1)
-        logging.info("waiting for a connection...")
-        self.client_connection, self.client_address = self.socket.accept()
-        logging.info("connected to: {0}".format(self.client_address[0]))
-
-    def endClient(self):
-        self.client_connection.shutdown(1)
-        self.client_connection.close()
-
-    def recieveNumpy(self, socket_buffer_size=1024):
-        if self.type is not "client":
-            raise ConfigurationError("class not configured as client")
+    def recieve(self, socket_buffer_size=1024):
+        socket = self.socket
+        if(self.client_connection):
+            socket = self.client_connection
 
         length = None
         frameBuffer = bytearray()
         while True:
-            data = self.client_connection.recv(socket_buffer_size)
+            data = socket.recv(socket_buffer_size)
             frameBuffer += data
             if len(frameBuffer) == length:
                 break
