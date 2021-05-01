@@ -7,6 +7,21 @@ The original purpose of this module is to send video frames (captured with OpenC
 ## Topology
 Currently, this library only allows for a `one-to-one` single connection setup (one client, one server). The relationship is not dynamic since a client cannot disconnect from the server and then have another client make a new connection. 
 
+## Installation
+### venv (optional)
+Run:
+```
+python -m venv .venv
+source .venv/bin/activate
+```
+
+### Install
+From within this git repo, run:
+```
+pip install .
+```
+
+
 ## Getting Started
 The `server` needs to be started first. Once started it will wait for a `client` connection. Once the `client` is connected the `server` and `client` can each send and receive data.
 
