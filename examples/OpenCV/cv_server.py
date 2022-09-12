@@ -1,22 +1,33 @@
+#!/usr/bin/python3
+
+import logging
+
 from numpysocket import NumpySocket
 import cv2
 
-cap = cv2.VideoCapture(0)
-npSocket = NumpySocket()
-npSocket.startServer(9999)
+logger = logging.getLogger('OpenCV server')
+logger.setLevel(logging.INFO)
 
-# Read until video is completed
-while(cap.isOpened()):
-    ret, frame = cap.read()
-    ref_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    frame_resize = ref_frame[::2, ::2]
-    if ret is True:
+with NumpySocket() as s:
+    s.bind(('', 9999))
+
+    while True:
         try:
-            npSocket.send(frame_resize)
-        except:
-            break
-    else:
-        break
-# When everything done, release the video capture object
-npSocket.close()
-cap.release()
+            s.listen()
+            conn, addr = s.accept()
+           
+            logger.info(f"connected: {addr}")
+            while conn:
+                frame = conn.recv()
+                if len(frame) == 0:
+                    break
+                
+                cv2.imshow('Frame', frame)
+                
+                # Press Q on keyboard to exit
+                if cv2.waitKey(25) & 0xFF == ord('q'):
+                    exit(1)
+            logger.info(f"disconnected: {addr}")
+        except ConnectionResetError:
+            pass
+

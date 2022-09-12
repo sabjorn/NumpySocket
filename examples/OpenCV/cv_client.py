@@ -1,22 +1,20 @@
-# ## From https://stackoverflow.com/questions/30988033/sending-live-video-frame-over-network-in-python-opencv
-# import socket
+#!/usr/bin/python3
+
 from numpysocket import NumpySocket
 import cv2
 
-host_ip = 'localhost'  # change me
+cap = cv2.VideoCapture(0)
 
-npSocket = NumpySocket()
-npSocket.startClient(host_ip, 9999)
-
-# Read until video is completed
-while(True):
-    # Capture frame-by-frame
-    frame = npSocket.recieve()
-    cv2.imshow('Frame', frame)
-
-    # Press Q on keyboard to  exit
-    if cv2.waitKey(25) & 0xFF == ord('q'):
-        break
-
-print("Closing")
-npSocket.close()
+with NumpySocket() as s:
+    s.connect(("localhost", 9999))
+    while(cap.isOpened()):
+        ret, frame = cap.read()
+        ref_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        frame_resize = ref_frame[::2, ::2]
+        if ret is True:
+            try:
+                s.sendall(frame_resize)
+            except:
+                break
+        else:
+            break
