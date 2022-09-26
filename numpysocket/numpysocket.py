@@ -6,98 +6,23 @@ import numpy as np
 from io import BytesIO
 
 
-class NumpySocket():
-    def __init__(self):
-        self.address = 0
-        self.port = 0
-        self.client_connection = self.client_address = None
-        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-
-    def __del__(self):
-        try:
-            self.client_connection.shutdown(socket.SHUT_WR)
-            self.socket.shutdown(socket.SHUT_WR)
-        except (AttributeError, OSError):
-            pass
-        except Exception as e:
-            logging.error("error when deleting socket", e)
-
-        self.close()
-
-    def startServer(self, port):
-        self.address = ''
-        self.port = port
-
-        self.socket.bind((self.address, self.port))
-        self.socket.listen(1)
-        
-        logging.debug("waiting for a connection")
-        self.client_connection, self.client_address = self.socket.accept()
-        logging.debug(f"connected to: {self.client_address[0]}")
-
-    def startClient(self, address, port):
-        self.address = address
-        self.port = port
-        try:
-            self.socket.connect((self.address, self.port))
-            logging.debug(f"Connected to {self.address} on port {self.port}")
-        except socket.error as err:
-            logging.error(f"Connection to {self.address} on port {self.port} failed")
-            raise
-
-    def close(self):
-        try:
-            self.client_connection.close()
-        except AttributeError:
-            pass
-        self.client_connection = self.client_address = None
-        self.socket.close()
-
-    @staticmethod
-    def __pack_frame(frame):
-        f = BytesIO()
-        np.savez(f, frame=frame)
-        
-        packet_size = len(f.getvalue())
-        header = '{0}:'.format(packet_size)
-        header = bytes(header.encode())  # prepend length of array
-
-        out = bytearray()
-        out += header
-
-        f.seek(0)
-        out += f.read()
-        return out
-
-    def send(self, frame):
+class NumpySocket(socket.socket):
+    def sendall(self, frame):
         if not isinstance(frame, np.ndarray):
-            raise TypeError("input frame is not a valid numpy array")
+            raise TypeError("input frame is not a valid numpy array") # should this just call super intead?
 
         out = self.__pack_frame(frame)
-
-        socket = self.socket
-        if(self.client_connection):
-            socket = self.client_connection
-
-        try:
-            socket.sendall(out)
-        except BrokenPipeError:
-            logging.error("connection broken")
-            raise
-
+        super().sendall(out)
         logging.debug("frame sent")
 
 
-    def recieve(self, socket_buffer_size=1024):
-        socket = self.socket
-        if(self.client_connection):
-            socket = self.client_connection
-
+    def recv(self, bufsize=1024):
         length = None
         frameBuffer = bytearray()
         while True:
-            data = socket.recv(socket_buffer_size)
+            data = super().recv(bufsize)
+            if len(data) == 0:
+                return np.array([])
             frameBuffer += data
             if len(frameBuffer) == length:
                 break
@@ -120,3 +45,28 @@ class NumpySocket():
         frame = np.load(BytesIO(frameBuffer))['frame']
         logging.debug("frame received")
         return frame
+
+    def accept(self):
+        fd, addr = super()._accept()
+        sock = NumpySocket(super().family, super().type, super().proto, fileno=fd)
+        
+        if socket.getdefaulttimeout() is None and super().gettimeout():
+            sock.setblocking(True)
+        return sock, addr
+    
+
+    @staticmethod
+    def __pack_frame(frame):
+        f = BytesIO()
+        np.savez(f, frame=frame)
+        
+        packet_size = len(f.getvalue())
+        header = '{0}:'.format(packet_size)
+        header = bytes(header.encode())  # prepend length of array
+
+        out = bytearray()
+        out += header
+
+        f.seek(0)
+        out += f.read()
+        return out
