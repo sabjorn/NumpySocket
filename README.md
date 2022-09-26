@@ -9,17 +9,8 @@ The subclass of `socket.socket` provides three key method overrides. All other `
 * `recv` - outputs a Numpy array (`len() == 0` if no data received)
 
 ## Installation
-### venv (optional)
-Run:
 ```
-python -m venv .venv
-source .venv/bin/activate
-```
-
-### Install
-From within this git repo, run:
-```
-pip install .
+pip install numpysocket
 ```
 
 ## Examples
