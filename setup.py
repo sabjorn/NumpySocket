@@ -1,7 +1,7 @@
 import setuptools
 
 setuptools.setup(name='numpysocket',
-  version='1.0.0',
+  version='1.0.1',
   description='TCP/IP Socket for Sending Numpy Arrays',
   long_description=open('README.md').read().strip(),
   long_description_content_type="text/markdown",
