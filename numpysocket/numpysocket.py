@@ -42,7 +42,7 @@ class NumpySocket(socket.socket):
                 length = None
                 break
         
-        frame = np.load(BytesIO(frameBuffer))['frame']
+        frame = np.load(BytesIO(frameBuffer), allow_pickle=True)['frame']
         logging.debug("frame received")
         return frame
 
