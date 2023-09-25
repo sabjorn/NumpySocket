@@ -1,4 +1,6 @@
-from numpysocket.numpysocket import NumpySocket
-
+from .numpysocket import NumpySocket
 import logging
+
 logging.getLogger(__name__).addHandler(logging.NullHandler())
+
+__all__ = ["NumpySocket"]
