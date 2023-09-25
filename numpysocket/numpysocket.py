@@ -7,44 +7,39 @@ from io import BytesIO
 
 
 class NumpySocket(socket.socket):
-    def sendall(self, frame):
-        if not isinstance(frame, np.ndarray):
-            raise TypeError("input frame is not a valid numpy array") # should this just call super intead?
-
+    def sendall(self, frame: np.ndarray) -> None:
         out = self.__pack_frame(frame)
         super().sendall(out)
         logging.debug("frame sent")
 
 
-    def recv(self, bufsize=1024):
+    def recv(self, bufsize:int=1024) -> np.ndarray:
         length = None
-        frameBuffer = bytearray()
+        frame_buffer = bytearray()
         while True:
             data = super().recv(bufsize)
             if len(data) == 0:
                 return np.array([])
-            frameBuffer += data
-            if len(frameBuffer) == length:
+            frame_buffer += data
+            if len(frame_buffer) == length:
                 break
             while True:
                 if length is None:
-                    if b':' not in frameBuffer:
+                    if b':' not in frame_buffer:
                         break
-                    # remove the length bytes from the front of frameBuffer
-                    # leave any remaining bytes in the frameBuffer!
-                    length_str, ignored, frameBuffer = frameBuffer.partition(b':')
+                    length_str, ignored, frame_buffer = frame_buffer.partition(b':')
                     length = int(length_str)
-                if len(frameBuffer) < length:
+                if len(frame_buffer) < length:
                     break
-                # split off the full message from the remaining bytes
-                # leave any remaining bytes in the frameBuffer!
-                frameBuffer = frameBuffer[length:]
+
+                frame_buffer = frame_buffer[length:]
                 length = None
                 break
         
-        frame = np.load(BytesIO(frameBuffer), allow_pickle=True)['frame']
+        frame = np.load(BytesIO(frame_buffer), allow_pickle=True)['frame']
         logging.debug("frame received")
         return frame
+
 
     def accept(self):
         fd, addr = super()._accept()
@@ -56,7 +51,7 @@ class NumpySocket(socket.socket):
     
 
     @staticmethod
-    def __pack_frame(frame):
+    def __pack_frame(frame: np.ndarray) -> bytearray:
         f = BytesIO()
         np.savez(f, frame=frame)
         
