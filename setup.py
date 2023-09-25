@@ -15,6 +15,9 @@ setuptools.setup(
         "dev": [
             "pre-commit",
         ],
+        "test": [
+            "pytest",
+        ],
     },
     license="MIT License",
     zip_safe=False,
