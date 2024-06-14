@@ -1,4 +1,6 @@
 # NumpySocket
+[![GitHub Sponsor](https://img.shields.io/github/sponsors/sabjorn?label=Sponsor&logo=GitHub)](https://github.com/sponsors/sabjorn)
+
 ## About
 Provides a subclass of `socket.socket` that enables a TCP/IP socket that can send and recieve Numpy arrays with the same interface as a regular Python `socket`.
 
