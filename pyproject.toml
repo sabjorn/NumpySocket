@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "numpysocket"
+version = "1.0.2"
+description = "Socket.Socket Subclass for Sending Numpy Arrays"
+readme = "README.md"
+authors = [
+    {name = "Steven A. Bjornson", email = "info@sabjorn.net"}
+]
+license = {text = "MIT License"}
+requires-python = ">=3.6"
+dependencies = [
+    "numpy<2.0.0",
+]
+classifiers = [
+    "",
+]
+keywords = []
+
+[project.urls]
+Homepage = "https://github.com/sabjorn/numpysocket"
+
+[project.optional-dependencies]
+dev = [
+    "pre-commit",
+]
