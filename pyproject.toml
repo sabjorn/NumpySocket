@@ -29,6 +29,7 @@ Homepage = "https://github.com/sabjorn/numpysocket"
 [dependency-groups]
 dev = [
     "pre-commit",
+    "pytest>=7.0.1",
 ]
 
 [tool.pytest.ini_options]
