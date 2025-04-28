@@ -1,6 +1,6 @@
 [build-system]
-requires = ["setuptools>=42", "wheel"]
-build-backend = "setuptools.build_meta"
+requires = ["uv>=0.1.0"]
+build-backend = "uv.build"
 
 [project]
 name = "numpysocket"
