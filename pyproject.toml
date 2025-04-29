@@ -4,16 +4,16 @@ build-backend = "hatchling.build"
 
 [project]
 name = "numpysocket"
-version = "1.0.2"
+version = "2.0.0"
 description = "Socket.Socket Subclass for Sending Numpy Arrays"
 readme = "README.md"
 authors = [
     {name = "Steven A. Bjornson", email = "info@sabjorn.net"}
 ]
 license = {text = "MIT License"}
-requires-python = ">=3.6"
+requires-python = ">=3.9"
 dependencies = [
-    "numpy<2.0.0",
+    "numpy>=2.0.0",
 ]
 classifiers = [
     "Programming Language :: Python :: 3",
