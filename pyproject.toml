@@ -1,0 +1,37 @@
+[build-system]
+requires = ["hatchling>=1.0.0"]
+build-backend = "hatchling.build"
+
+[project]
+name = "numpysocket"
+version = "1.0.2"
+description = "Socket.Socket Subclass for Sending Numpy Arrays"
+readme = "README.md"
+authors = [
+    {name = "Steven A. Bjornson", email = "info@sabjorn.net"}
+]
+license = {text = "MIT License"}
+requires-python = ">=3.6"
+dependencies = [
+    "numpy<2.0.0",
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+keywords = []
+
+[project.urls]
+Homepage = "https://github.com/sabjorn/numpysocket"
+
+
+[dependency-groups]
+dev = [
+    "pre-commit",
+    "pytest>=7.0.1",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = "test_*.py"

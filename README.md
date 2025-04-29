@@ -47,3 +47,16 @@ python cv_client.py
 ```
 
 Kill terminal 2 and re-run the command and the **server** will allow for the new connection.
+
+## Dev
+
+### install uv
+```
+pip install uv
+```
+
+### install in editable mode
+```
+uv venv
+uv pip install -e .
+```
