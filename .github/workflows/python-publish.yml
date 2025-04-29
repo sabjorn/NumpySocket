@@ -1,0 +1,28 @@
+name: "Publish to PyPI"
+
+on: push
+#  release:
+#    types: [published]
+
+permissions:
+  contents: read
+
+jobs:
+  release-build:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+    environment:
+      name: pypi
+      url: https://pypi.org/project/numpysocket/${{ github.event.release.name }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+      - name: Install uv 
+        run: pip install uv
+      - name: Build release
+        run: uv build 
+      - name: debug
+        run: ls -alh 
