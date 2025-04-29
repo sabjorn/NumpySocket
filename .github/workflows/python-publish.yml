@@ -1,0 +1,32 @@
+name: "Publish to PyPI"
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  release-build:
+    runs-on: ubuntu-latest
+    
+    environment:
+      name: pypi
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+      
+      - name: Install uv
+        run: pip install uv
+      
+      - name: Build package
+        run: uv build
+      
+      - name: Publish to PyPI
+        run: uv publish
