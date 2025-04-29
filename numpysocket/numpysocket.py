@@ -3,7 +3,7 @@
 from io import BytesIO
 import logging
 import socket
-from typing import Any
+from typing import Any, Union
 
 import numpy as np
 
@@ -28,7 +28,7 @@ class NumpySocket(socket.socket):
                 if length is None:
                     if b":" not in frame_buffer:
                         break
-                    length_str, ignored, frame_buffer = frame_buffer.partition(b":")
+                    length_str, _, frame_buffer = frame_buffer.partition(b":")
                     length = int(length_str)
                 if len(frame_buffer) < length:
                     break
@@ -41,7 +41,7 @@ class NumpySocket(socket.socket):
         logging.debug("frame received")
         return frame
 
-    def accept(self) -> tuple["NumpySocket", tuple[str, int] | tuple[Any, ...]]:
+    def accept(self) -> tuple["NumpySocket", Union[tuple[str, int], tuple[Any, ...]]]:
         fd, addr = super()._accept()  # type: ignore
         sock = NumpySocket(super().family, super().type, super().proto, fileno=fd)
 
