@@ -1,12 +1,12 @@
 name: "Publish to PyPI"
 
-on: push
-#  release:
-#    types: [published]
+on:
+  release:
+    types: [published]
 
 permissions:
   contents: read
-  id-token: write  # Required for trusted publishing
+  id-token: write
 
 jobs:
   release-build:
@@ -14,7 +14,6 @@ jobs:
     
     environment:
       name: pypi
-      url: https://pypi.org/project/numpysocket/${{ github.event.release.name }}
     
     steps:
       - uses: actions/checkout@v4
