@@ -3,7 +3,7 @@
 from io import BytesIO
 import logging
 import socket
-from typing import Any, Union, Tuple
+from typing import Any, Union
 
 import numpy as np
 
@@ -41,7 +41,7 @@ class NumpySocket(socket.socket):
         logging.debug("frame received")
         return frame
 
-    def accept(self) -> Tuple["NumpySocket", Union[Tuple[str, int], Tuple[Any, ...]]]:
+    def accept(self) -> tuple["NumpySocket", Union[tuple[str, int], tuple[Any, ...]]]:
         fd, addr = super()._accept()  # type: ignore
         sock = NumpySocket(super().family, super().type, super().proto, fileno=fd)
 
