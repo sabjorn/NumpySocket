@@ -17,29 +17,44 @@ class NumpySocket(socket.socket):
     def recv(self, bufsize: int = 1024) -> np.ndarray:  # type: ignore[override]
         length = None
         frame_buffer = bytearray()
+
         while True:
-            data = super().recv(bufsize)
+            receive_size = bufsize
+            if length is not None:
+                remaining = length - len(frame_buffer)
+                receive_size = min(bufsize, remaining)
+                logging.debug(
+                    f"Receiving {receive_size} of {remaining} remaining bytes"
+                )
+
+            data = super().recv(receive_size)
             if len(data) == 0:
                 return np.array([])
+
             frame_buffer += data
-            if len(frame_buffer) == length:
-                break
-            while True:
-                if length is None:
-                    if b":" not in frame_buffer:
-                        break
-                    length_str, _, frame_buffer = frame_buffer.partition(b":")
-                    length = int(length_str)
-                if len(frame_buffer) < length:
-                    break
+            if length is None:
+                if b":" not in frame_buffer:
+                    continue
+                header, _, data = frame_buffer.partition(b":")
+                try:
+                    length = int(header.decode())
+                    frame_buffer = data
+                except ValueError:
+                    logging.error("Invalid header format")
+                    return np.array([])
 
-                frame_buffer = frame_buffer[length:]
-                length = None
-                break
+            if len(frame_buffer) < length:
+                continue
 
-        frame = np.load(BytesIO(frame_buffer), allow_pickle=True)["frame"]
-        logging.debug("frame received")
-        return frame
+            frame_data = frame_buffer[:length]
+
+            try:
+                frame = np.load(BytesIO(frame_data), allow_pickle=True)["frame"]
+                logging.debug("Frame received")
+                return frame
+            except Exception as e:
+                logging.error(f"Error parsing frame: {e}")
+                return np.array([])
 
     def accept(self) -> tuple["NumpySocket", Union[tuple[str, int], tuple[Any, ...]]]:
         fd, addr = super()._accept()  # type: ignore

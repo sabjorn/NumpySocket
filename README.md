@@ -10,6 +10,9 @@ The subclass of `socket.socket` provides three key method overrides. All other `
 * `sendall` - takes a Numpy array as an argument to send an Array
 * `recv` - outputs a Numpy array (`len() == 0` if no data received)
 
+### Known Issues
+With a large value for `bufsize` in `recv()` there it is not guaranteed that multiple small arrays will be fully received. You should always set your `bufsize` to be small enough that it will not "reach over" to the next array.
+
 ## Installation
 ```
 pip install numpysocket
