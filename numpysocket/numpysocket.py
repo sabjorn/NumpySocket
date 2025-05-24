@@ -3,7 +3,7 @@
 from io import BytesIO
 import logging
 import socket
-from typing import Any, Union
+from typing import Any, Union, Tuple
 
 import numpy as np
 
@@ -56,7 +56,7 @@ class NumpySocket(socket.socket):
                 logging.error(f"Error parsing frame: {e}")
                 return np.array([])
 
-    def accept(self) -> tuple["NumpySocket", Union[tuple[str, int], tuple[Any, ...]]]:
+    def accept(self) -> Tuple["NumpySocket", Union[Tuple[str, int], Tuple[Any, ...]]]:
         fd, addr = super()._accept()  # type: ignore
         sock = NumpySocket(super().family, super().type, super().proto, fileno=fd)
 

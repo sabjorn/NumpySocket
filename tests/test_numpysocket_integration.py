@@ -2,6 +2,7 @@ import unittest
 import os
 import socket
 import threading
+from typing import List
 import numpy as np
 
 from numpysocket import NumpySocket
@@ -24,7 +25,7 @@ class TestNumpySocketIntegration(unittest.TestCase):
 
     def _run_socket_test(
         self, send_arrays: np.array, buffer_size: int = 1024
-    ) -> list[np.array]:
+    ) -> List[np.array]:
         recv_count = len(send_arrays)
 
         received_arrays = []
